@@ -2,102 +2,119 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>AI Architecture to Terraform</title>
+  <title>AI Architecture → Terraform Generator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f4f6f8;
-      color: #333;
+      background-color: #eef1f5;
+      color: #222;
     }
 
     header {
-      background-color: #2c3e50;
+      background: linear-gradient(135deg, #0077b6, #0096c7);
       color: white;
-      padding: 1rem;
+      padding: 1.5rem;
       text-align: center;
+      box-shadow: 0 3px 5px rgba(0,0,0,0.1);
     }
 
     main {
       padding: 2rem;
-      max-width: 800px;
+      max-width: 900px;
       margin: auto;
     }
 
     .upload-section {
       background: white;
-      padding: 1rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      text-align: center;
       margin-bottom: 2rem;
     }
 
-    .chat {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
+    .upload-section input[type="file"] {
+      margin: 1rem 0;
+    }
+
+    button {
+      padding: 0.6rem 1.5rem;
+      border: none;
+      background-color: #0077b6;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.2s;
+      margin: 0.3rem;
+    }
+
+    button:hover {
+      background-color: #023e8a;
     }
 
     .chat-item {
       background: white;
-      padding: 1rem;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
     }
 
     .chat-img {
-      width: 256px;
-      border-radius: 4px;
+      width: 250px;
+      border-radius: 6px;
       cursor: pointer;
+      display: block;
+      margin-top: 0.5rem;
     }
 
-    pre {
-      background: #ecf0f1;
+    pre, textarea {
+      background: #f7f9fa;
       padding: 1rem;
-      border-radius: 4px;
+      border-radius: 8px;
       overflow-x: auto;
-    }
-
-    button {
-      margin: 0.5rem 0.5rem 0 0;
-      padding: 0.5rem 1rem;
-      border: none;
-      background-color: #3498db;
-      color: white;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #2980b9;
-    }
-
-    #popup {
-      display: none;
-      position: fixed;
-      top: 10%;
-      left: 10%;
-      width: 80%;
-      height: 80%;
-      background: white;
-      border: 2px solid #000;
-      z-index: 1000;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    }
-
-    #popup img {
+      border: 1px solid #ddd;
+      font-size: 0.95rem;
       width: 100%;
-      height: auto;
+      font-family: monospace;
     }
 
-    #popup-close {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 1.5rem;
-      cursor: pointer;
+    #chatbox {
+      background: #f9fafb;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    #messages {
+      max-height: 250px;
+      overflow-y: auto;
+      padding: 0.5rem;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+    }
+
+    .message {
+      margin: 0.4rem 0;
+      padding: 0.5rem 0.8rem;
+      border-radius: 6px;
+    }
+
+    .user {
+      background: #d0ebff;
+      text-align: right;
+    }
+
+    .bot {
+      background: #e6ffe6;
+      text-align: left;
     }
 
     .status {
@@ -105,39 +122,39 @@
       color: #555;
       margin-top: 0.5rem;
     }
+
+    .cost-summary {
+      background: #e7f9ee;
+      border: 1px solid #b3e6c1;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+
+    .cost-summary strong {
+      color: #007a33;
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1>AI Architecture to Terraform Generator</h1>
+    <h1>AI Architecture → Terraform Generator</h1>
   </header>
 
   <main>
     <div class="upload-section">
-      <input type="file" id="upload" />
+      <h3>Upload Architecture Diagram</h3>
+      <input type="file" id="upload" accept="image/*" />
+      <br />
       <button onclick="generate()">Generate Terraform</button>
     </div>
 
-    <div id="chat" class="chat"></div>
-
-    <div id="popup">
-      <span id="popup-close">❌</span>
-      <img id="popup-img" />
-    </div>
+    <div id="chat"></div>
   </main>
 
   <script>
     const chat = document.getElementById('chat');
-    const popup = document.getElementById('popup');
-    const popupImg = document.getElementById('popup-img');
-    const popupClose = document.getElementById('popup-close');
-
-    popupClose.onclick = () => popup.style.display = 'none';
-
-    function showPopup(src) {
-      popupImg.src = src;
-      popup.style.display = 'block';
-    }
+    let currentCodeBlock = null;
 
     function generate() {
       const fileInput = document.getElementById('upload');
@@ -146,40 +163,36 @@
 
       const reader = new FileReader();
       reader.onload = () => {
-        const img = document.createElement('img');
-        img.src = reader.result;
-        img.className = 'chat-img';
-        img.onclick = () => showPopup(reader.result);
-
         const chatItem = document.createElement('div');
         chatItem.className = 'chat-item';
-        chatItem.innerHTML = `<strong>User uploaded:</strong>`;
-        chatItem.appendChild(img);
+        chatItem.innerHTML = `
+          <strong>Uploaded Diagram:</strong>
+          <img src="${reader.result}" class="chat-img" />
+          <div class="status">Processing image...</div>
+        `;
         chat.appendChild(chatItem);
-
-        const status = document.createElement('div');
-        status.className = 'status';
-        status.textContent = 'Processing image...';
-        chat.appendChild(status);
 
         const formData = new FormData();
         formData.append('diagram', file);
 
         fetch('/upload', { method: 'POST', body: formData })
           .then(async res => {
-            status.textContent = 'Generating JSON from diagram...';
             const code = await res.text();
-            status.textContent = 'Generating Terraform code...';
+            const status = chatItem.querySelector('.status');
+            status.textContent = 'Terraform code generated successfully.';
 
-            setTimeout(() => {
-              status.textContent = 'Terraform code generated.';
-              const codeBlock = document.createElement('pre');
-              codeBlock.textContent = code;
-              chat.appendChild(codeBlock);
-              askFollowUp(code);
-            }, 1000);
+            const codeBlock = document.createElement('pre');
+            codeBlock.textContent = code;
+            codeBlock.id = "terraformCode";
+            chatItem.appendChild(document.createElement('hr'));
+            chatItem.innerHTML += `<strong>Generated Terraform Code:</strong>`;
+            chatItem.appendChild(codeBlock);
+            currentCodeBlock = codeBlock;
+
+            addPromptSection();
           })
           .catch(err => {
+            const status = chatItem.querySelector('.status');
             status.textContent = 'Error generating Terraform code.';
             console.error(err);
           });
@@ -187,71 +200,102 @@
       reader.readAsDataURL(file);
     }
 
-    function askFollowUp(code) {
-      const followUp = document.createElement('div');
-      followUp.className = 'chat-item';
-      followUp.innerHTML = `
-        <p>Would you like to:</p>
-        <button onclick="editCode()">Edit Code</button>
-        <button onclick="lintCode()">Run Terraform Lint</button>
-        <button onclick="estimateCost()">Estimate Monthly Cost</button>
+    function addPromptSection() {
+      const promptDiv = document.createElement('div');
+      promptDiv.className = 'chat-item';
+      promptDiv.innerHTML = `
+        <h3>Next Steps</h3>
+        <p>Use the chat below to edit, lint, or estimate cost of your Terraform script dynamically.</p>
+        <div id="chatbox">
+          <div id="messages"></div>
+          <input id="userInput" placeholder="e.g. Estimate cost or run linting" style="width:75%;padding:0.5rem;">
+          <button onclick="sendMessage()">Send</button>
+        </div>
       `;
-      chat.appendChild(followUp);
+      chat.appendChild(promptDiv);
     }
 
-    function editCode() {
-      const instruction = prompt('Enter your edit instruction:');
-      if (!instruction) return;
+    function appendMessage(text, sender = "bot") {
+      const messages = document.getElementById('messages');
+      const msg = document.createElement('div');
+      msg.className = `message ${sender}`;
+      msg.innerHTML = text;
+      messages.appendChild(msg);
+      messages.scrollTop = messages.scrollHeight;
+    }
 
-      const status = document.createElement('div');
-      status.className = 'status';
-      status.textContent = 'Editing Terraform code...';
-      chat.appendChild(status);
+    // 🧠 Enhanced chat logic with cost + lint + edit
+    function sendMessage() {
+      const input = document.getElementById('userInput');
+      const message = input.value.trim();
+      if (!message) return;
+      appendMessage(message, 'user');
+      input.value = '';
 
+      const lower = message.toLowerCase();
+
+      // 💰 Cost Estimation Command
+      if (lower.includes('cost') || lower.includes('estimate') || lower.includes('price')) {
+        appendMessage('Calculating resource cost... 💰', 'bot');
+        fetch('/estimate-cost')
+          .then(res => res.json())
+          .then(data => {
+            if (data.cost) {
+              let html = `<div class="cost-summary">
+                <strong>💰 Estimated Monthly Cost:</strong> $${data.cost}
+              </div>`;
+
+              if (data.resources && data.resources.length > 0) {
+                html += "<ul>";
+                data.resources.forEach(r => {
+                  html += `<li>${r.name}: $${r.monthlyCost}</li>`;
+                });
+                html += "</ul>";
+              }
+
+              appendMessage(html, 'bot');
+            } else {
+              appendMessage('⚠️ No cost data available.', 'bot');
+            }
+          })
+          .catch(err => {
+            appendMessage('❌ Error retrieving cost data.', 'bot');
+            console.error(err);
+          });
+        return;
+      }
+
+      // 🧩 Linting Command
+      if (lower.includes('lint') || lower.includes('validate') || lower.includes('format')) {
+        appendMessage('Running Terraform linting...', 'bot');
+        fetch('/lint')
+          .then(res => res.text())
+          .then(result => {
+            appendMessage('✅ Linting completed successfully.', 'bot');
+          })
+          .catch(err => {
+            appendMessage('❌ Error running linting command.', 'bot');
+            console.error(err);
+          });
+        return;
+      }
+
+      // 🧱 Default Case — Send to /edit for script update
       fetch('/edit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ instruction })
+        body: JSON.stringify({ instruction: message })
       })
-      .then(res => res.text())
-      .then(updated => {
-        status.textContent = 'Code updated.';
-        const updatedBlock = document.createElement('pre');
-        updatedBlock.textContent = updated;
-        chat.appendChild(updatedBlock);
-      });
-    }
-
-    function lintCode() {
-      const status = document.createElement('div');
-      status.className = 'status';
-      status.textContent = 'Running Terraform lint...';
-      chat.appendChild(status);
-
-      fetch('/lint')
         .then(res => res.text())
-        .then(result => {
-          status.textContent = 'Lint results:';
-          const lintBlock = document.createElement('pre');
-          lintBlock.textContent = result;
-          chat.appendChild(lintBlock);
-        });
-    }
-
-    function estimateCost() {
-      const status = document.createElement('div');
-      status.className = 'status';
-      status.textContent = 'Estimating monthly cost...';
-      chat.appendChild(status);
-
-      fetch('/estimate-cost')
-        .then(res => res.json())
-        .then(data => {
-          status.textContent = 'Estimated cost retrieved.';
-          const costBlock = document.createElement('div');
-          costBlock.className = 'chat-item';
-          costBlock.innerHTML = `<strong>Estimated Monthly Cost:</strong> \$${data.cost}`;
-          chat.appendChild(costBlock);
+        .then(updatedCode => {
+          appendMessage('Terraform updated successfully ✅', 'bot');
+          if (currentCodeBlock) {
+            currentCodeBlock.textContent = updatedCode;
+          }
+        })
+        .catch(err => {
+          appendMessage('Error updating script ❌', 'bot');
+          console.error(err);
         });
     }
   </script>
