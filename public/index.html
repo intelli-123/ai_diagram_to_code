@@ -4,21 +4,29 @@
   <meta charset="UTF-8" />
   <title>AI Architecture → Terraform Generator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
+    /* Consider moving this to an external CSS file for better organization */
     body {
       font-family: 'Segoe UI', sans-serif;
       margin: 0;
       padding: 0;
       background-color: #eef1f5;
       color: #222;
+      line-height: 1.6; /* Improves readability */
     }
 
     header {
       background: linear-gradient(135deg, #0077b6, #0096c7);
       color: white;
-      padding: 1.5rem;
+      padding: 2rem 1.5rem; /* Increased padding */
       text-align: center;
       box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      margin: 0; /* Remove default margin for better spacing */
+      font-size: 2.2rem; /* Adjusted font size */
     }
 
     main {
@@ -29,26 +37,31 @@
 
     .upload-section {
       background: white;
-      padding: 1.5rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 2rem; /* Increased padding */
+      border-radius: 12px; /* Slightly rounder */
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1); /* Stronger shadow */
       text-align: center;
       margin-bottom: 2rem;
     }
 
+    .upload-section h3 {
+      margin-bottom: 1.2rem; /* Space below the heading */
+      font-size: 1.5rem;
+    }
+
     .upload-section input[type="file"] {
-      margin: 1rem 0;
+      margin: 1.2rem 0;
     }
 
     button {
-      padding: 0.6rem 1.5rem;
+      padding: 0.75rem 1.75rem; /* Adjusted button padding */
       border: none;
       background-color: #0077b6;
       color: white;
-      border-radius: 6px;
+      border-radius: 8px; /* Rounder buttons */
       cursor: pointer;
-      font-size: 1rem;
-      transition: background 0.2s;
+      font-size: 1.1rem; /* Adjusted font size */
+      transition: background 0.2s ease-in-out; /* Smoother transition */
       margin: 0.3rem;
     }
 
@@ -58,81 +71,144 @@
 
     .chat-item {
       background: white;
-      padding: 1.5rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      margin-bottom: 1.5rem;
+      padding: 2rem; /* Increased padding */
+      border-radius: 12px; /* Slightly rounder */
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1); /* Stronger shadow */
+      margin-bottom: 2rem;
+      width: 100%; /* Ensure chat items take full width */
+      box-sizing: border-box; /* Include padding and border in element's total width */
     }
 
     .chat-img {
-      width: 250px;
-      border-radius: 6px;
+      width: 100%; /* Make image responsive */
+      max-width: 300px; /* Limit maximum width */
+      border-radius: 8px;
       cursor: pointer;
       display: block;
-      margin-top: 0.5rem;
+      margin: 1rem auto; /* Center the image */
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15); /* Add a subtle shadow */
     }
 
     pre, textarea {
       background: #f7f9fa;
-      padding: 1rem;
-      border-radius: 8px;
+      padding: 1.2rem; /* Increased padding */
+      border-radius: 10px; /* Slightly rounder */
       overflow-x: auto;
       border: 1px solid #ddd;
-      font-size: 0.95rem;
+      font-size: 1rem; /* Adjusted font size */
       width: 100%;
       font-family: monospace;
+      white-space: pre-wrap; /* Wrap long lines */
+      box-sizing: border-box;
     }
 
     #chatbox {
       background: #f9fafb;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      padding: 1rem;
+      border-radius: 10px; /* Slightly rounder */
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1); /* Stronger shadow */
+      padding: 1.2rem; /* Increased padding */
       margin-top: 1rem;
+      display: flex;
+      align-items: center; /* Vertically align items */
     }
 
     #messages {
-      max-height: 250px;
+      max-height: 300px; /* Increased max height */
       overflow-y: auto;
-      padding: 0.5rem;
+      padding: 0.75rem; /* Adjusted padding */
       background: #fff;
       border: 1px solid #ddd;
-      border-radius: 6px;
+      border-radius: 8px; /* Slightly rounder */
       margin-bottom: 1rem;
+      flex-grow: 1; /* Take up remaining space */
+      display: flex;
+      flex-direction: column; /* Ensure messages stack vertically */
     }
 
     .message {
-      margin: 0.4rem 0;
-      padding: 0.5rem 0.8rem;
-      border-radius: 6px;
+      margin: 0.5rem 0;
+      padding: 0.6rem 1rem; /* Adjusted padding */
+      border-radius: 8px; /* Slightly rounder */
+      word-break: break-word; /* Prevent long words from overflowing */
+      display: inline-block;
+      max-width: 80%; /* Limit message width */
     }
 
     .user {
       background: #d0ebff;
       text-align: right;
+      align-self: flex-end; /* Align user messages to the right */
     }
 
     .bot {
       background: #e6ffe6;
       text-align: left;
+      align-self: flex-start; /* Align bot messages to the left */
     }
 
     .status {
       font-style: italic;
       color: #555;
-      margin-top: 0.5rem;
+      margin-top: 0.75rem;
     }
 
     .cost-summary {
       background: #e7f9ee;
       border: 1px solid #b3e6c1;
-      padding: 10px;
-      border-radius: 6px;
+      padding: 12px; /* Adjusted padding */
+      border-radius: 8px; /* Slightly rounder */
       margin-top: 10px;
     }
 
     .cost-summary strong {
       color: #007a33;
+    }
+
+    /* Input and button styling in chatbox */
+    #userInput {
+      padding: 0.75rem; /* Adjusted padding */
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      flex-grow: 1; /* Grow to fill available space */
+      margin-right: 0.5rem; /* Add spacing between input and button */
+      resize: vertical; /* Allow vertical resizing */
+      min-height: 40px; /* Minimum height for the textarea */
+    }
+
+    #userInput:focus {
+      outline: none;
+      border-color: #0077b6;
+      box-shadow: 0 0 5px rgba(0, 119, 182, 0.3);
+    }
+
+    #chatbox button {
+      padding: 0.75rem 1.5rem; /* Consistent button padding */
+    }
+
+    /* Add responsive design using media queries */
+    @media (max-width: 768px) {
+      main {
+        padding: 1.5rem;
+      }
+
+      .upload-section, .chat-item {
+        padding: 1.5rem;
+      }
+
+      #chatbox {
+        flex-direction: column; /* Stack input and button on smaller screens */
+        align-items: stretch; /* Make items take full width */
+      }
+
+      #userInput {
+        margin-right: 0; /* Remove right margin */
+        margin-bottom: 0.5rem; /* Add bottom margin */
+      }
+
+      .message {
+          max-width: 90%;
+      }
     }
   </style>
 </head>
@@ -142,86 +218,103 @@
   </header>
 
   <main>
-    <div class="upload-section">
+    <div class="upload-section" id="uploadSection">
       <h3>Upload Architecture Diagram</h3>
       <input type="file" id="upload" accept="image/*" />
       <br />
       <button onclick="generate()">Generate Terraform</button>
     </div>
 
-    <div id="chat"></div>
+    <div id="chat" style="display: none;">
+        <div class="chat-item">
+            <div id="messages"></div>
+            <div id="chatbox">
+              <textarea id="userInput" placeholder="e.g. Estimate cost or run linting" style="width:75%;padding:0.5rem;"></textarea>
+              <button onclick="sendMessage()" id="sendButton">Send</button>
+            </div>
+        </div>
+    </div>
   </main>
 
   <script>
+    const uploadSection = document.getElementById('uploadSection');
+    const chatDiv = document.getElementById('chat');
     const chat = document.getElementById('chat');
     let currentCodeBlock = null;
+    let isRunning = false; // Flag to track if a process is running
+    const sendButton = document.getElementById('sendButton');
+
+    // Function to disable/enable the send button
+    function setButtonState(disabled) {
+      isRunning = disabled;
+      sendButton.disabled = disabled;
+    }
 
     function generate() {
       const fileInput = document.getElementById('upload');
       const file = fileInput.files[0];
       if (!file) return alert('Please upload a diagram.');
 
+      uploadSection.style.display = 'none'; // Hide upload section
+      chatDiv.style.display = 'block'; // Show chat interface
+
       const reader = new FileReader();
       reader.onload = () => {
+        //Create Initial Message
         const chatItem = document.createElement('div');
-        chatItem.className = 'chat-item';
+        chatItem.className = 'chat-item bot';
         chatItem.innerHTML = `
           <strong>Uploaded Diagram:</strong>
-          <img src="${reader.result}" class="chat-img" />
-          <div class="status">Processing image...</div>
+          <img src="${reader.result}" class="chat-img" alt="Uploaded Architecture Diagram"/>
+          <div id="processing-status">Processing image... <i class="fas fa-spinner fa-spin"></i></div>
         `;
-        chat.appendChild(chatItem);
 
+        const messageId = appendMessage(chatItem.outerHTML, 'bot'); //Append upload image to bot
+          const updateCodeWithTerraform = (messageId, code) => {
+            const chatItem = document.createElement('div');
+            chatItem.className = 'chat-item bot';
+            chatItem.innerHTML += `Terraform code generated successfully. ✅`;
+
+            const codeBlock = document.createElement('pre');
+            codeBlock.textContent = code;
+            codeBlock.id = "terraformCode";
+
+            //Appending to Message
+            chatItem.appendChild(document.createElement('hr'));
+            chatItem.innerHTML += `<strong>Generated Terraform Code:</strong>`;
+            chatItem.appendChild(codeBlock);
+            updateMessage(messageId, chatItem.outerHTML);
+          }
         const formData = new FormData();
         formData.append('diagram', file);
 
         fetch('/upload', { method: 'POST', body: formData })
           .then(async res => {
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
             const code = await res.text();
-            const status = chatItem.querySelector('.status');
-            status.textContent = 'Terraform code generated successfully.';
+            updateCodeWithTerraform(messageId, code); //Updating instead.
 
-            const codeBlock = document.createElement('pre');
-            codeBlock.textContent = code;
-            codeBlock.id = "terraformCode";
-            chatItem.appendChild(document.createElement('hr'));
-            chatItem.innerHTML += `<strong>Generated Terraform Code:</strong>`;
-            chatItem.appendChild(codeBlock);
-            currentCodeBlock = codeBlock;
-
-            addPromptSection();
           })
           .catch(err => {
-            const status = chatItem.querySelector('.status');
-            status.textContent = 'Error generating Terraform code.';
+            chatItem.innerHTML = 'Error generating Terraform code. ❌';
+            updateMessage(messageId, chatItem.outerHTML);
             console.error(err);
           });
       };
       reader.readAsDataURL(file);
     }
 
-    function addPromptSection() {
-      const promptDiv = document.createElement('div');
-      promptDiv.className = 'chat-item';
-      promptDiv.innerHTML = `
-        <h3>Next Steps</h3>
-        <p>Use the chat below to edit, lint, or estimate cost of your Terraform script dynamically.</p>
-        <div id="chatbox">
-          <div id="messages"></div>
-          <input id="userInput" placeholder="e.g. Estimate cost or run linting" style="width:75%;padding:0.5rem;">
-          <button onclick="sendMessage()">Send</button>
-        </div>
-      `;
-      chat.appendChild(promptDiv);
-    }
-
     function appendMessage(text, sender = "bot") {
       const messages = document.getElementById('messages');
       const msg = document.createElement('div');
-      msg.className = `message ${sender}`;
+      msg.className = `message ${sender} chat-item`;
+      msg.classList.add(sender)
       msg.innerHTML = text;
       messages.appendChild(msg);
       messages.scrollTop = messages.scrollHeight;
+      return msg.id = Math.random().toString(36).substring(2, 15);
     }
 
     // 🧠 Enhanced chat logic with cost + lint + edit
@@ -229,58 +322,64 @@
       const input = document.getElementById('userInput');
       const message = input.value.trim();
       if (!message) return;
-      appendMessage(message, 'user');
+      const messageId = appendMessage(message, 'user');
       input.value = '';
+       input.style.height = 'auto';  // Reset height for dynamic resizing
+      input.style.height = input.scrollHeight + 'px'; // Set correct height
 
       const lower = message.toLowerCase();
+      // Disable the send button while processing
+      setButtonState(true);
+      let statusMessageId; // Store the ID of the status message
 
       // 💰 Cost Estimation Command
       if (lower.includes('cost') || lower.includes('estimate') || lower.includes('price')) {
-        appendMessage('Calculating resource cost... 💰', 'bot');
-        fetch('/estimate-cost')
-          .then(res => res.json())
-          .then(data => {
-            if (data.cost) {
-              let html = `<div class="cost-summary">
-                <strong>💰 Estimated Monthly Cost:</strong> $${data.cost}
-              </div>`;
-
-              if (data.resources && data.resources.length > 0) {
-                html += "<ul>";
-                data.resources.forEach(r => {
-                  html += `<li>${r.name}: $${r.monthlyCost}</li>`;
-                });
-                html += "</ul>";
-              }
-
-              appendMessage(html, 'bot');
-            } else {
-              appendMessage('⚠️ No cost data available.', 'bot');
+         statusMessageId = appendMessage('Calculating resource cost... 💰 <i class="fas fa-spinner fa-spin"></i>', 'bot');
+         fetch('/estimate-cost')
+          .then(res => res.text()) // Expecting plain text
+          .then(result => {
+            let html = '❌ Error retrieving cost data.'; // Default error message
+            if (result && result.trim() !== '') {
+              html = `<pre>${result}</pre>`; // Display result in <pre> tag
             }
+            // Replace the status message with the result
+            updateMessage(statusMessageId, html);
+            setButtonState(false); // Re-enable the send button
           })
           .catch(err => {
-            appendMessage('❌ Error retrieving cost data.', 'bot');
+            // Replace the status message with the error
+            updateMessage(statusMessageId, '❌ Error retrieving cost data.');
             console.error(err);
+            setButtonState(false); // Re-enable the send button
           });
         return;
       }
 
       // 🧩 Linting Command
       if (lower.includes('lint') || lower.includes('validate') || lower.includes('format')) {
-        appendMessage('Running Terraform linting...', 'bot');
+        statusMessageId = appendMessage('Running Terraform linting... <i class="fas fa-spinner fa-spin"></i>', 'bot');
         fetch('/lint')
           .then(res => res.text())
           .then(result => {
-            appendMessage('✅ Linting completed successfully.', 'bot');
+             let message = '✅ Linting completed. No issues found.';
+            if (result && result.trim() !== '') {
+              message = `✅ Linting completed:\n<pre>${result}</pre>`;
+            }
+              // Replace the status message with the result
+            updateMessage(statusMessageId, message);
+            setButtonState(false); // Re-enable the send button
           })
           .catch(err => {
-            appendMessage('❌ Error running linting command.', 'bot');
+              // Replace the status message with the error
+            updateMessage(statusMessageId, '❌ Error running linting command.');
             console.error(err);
+            setButtonState(false); // Re-enable the send button
           });
         return;
       }
 
       // 🧱 Default Case — Send to /edit for script update
+      statusMessageId = appendMessage('Updating Terraform script... <i class="fas fa-spinner fa-spin"></i>', 'bot');
       fetch('/edit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -288,16 +387,42 @@
       })
         .then(res => res.text())
         .then(updatedCode => {
-          appendMessage('Terraform updated successfully ✅', 'bot');
-          if (currentCodeBlock) {
-            currentCodeBlock.textContent = updatedCode;
+            // Replace the status message with the result
+          updateMessage(statusMessageId, 'Terraform updated successfully ✅');
+          const codeBlock = document.getElementById('terraformCode');
+          if (codeBlock) {
+            codeBlock.textContent = updatedCode;
           }
+            setButtonState(false); // Re-enable the send button
         })
         .catch(err => {
-          appendMessage('Error updating script ❌', 'bot');
+            // Replace the status message with the error
+          updateMessage(statusMessageId, 'Error updating script ❌');
           console.error(err);
+            setButtonState(false); // Re-enable the send button
         });
     }
+    // Function to dynamically update a message
+    function updateMessage(messageId, newMessage) {
+      const messageElement = document.getElementById(messageId);
+      if (messageElement) {
+        messageElement.outerHTML = newMessage;
+      }
+    }
+
+    const userInput = document.getElementById('userInput');
+
+    userInput.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();  // Prevent the default Enter behavior (newline)
+        sendMessage(); // Call the sendMessage function
+      }
+    });
+
+    userInput.addEventListener('input', function() {
+      this.style.height = 'auto';  // Reset height for dynamic resizing
+      this.style.height = this.scrollHeight + 'px'; // Set correct height
+    });
   </script>
 </body>
 </html>

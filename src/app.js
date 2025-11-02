@@ -200,12 +200,33 @@ app.get('/lint', async (req, res) => {
   const tfDir = path.dirname(lastTfFilePath);
   const tfFilename = path.basename(lastTfFilePath);
 
-  exec(`terraform validate && tflint --filter=${tfFilename} --chdir ${tfDir}`, (error, stdout, stderr) => {
-    if (error) {
-      console.error('[ERROR] Linting failed:', stderr);
-      return res.status(500).send(`Linting failed: ${stderr}`);
+  const cmd = `
+    cd ${tfDir} &&
+    terraform init -input=false -no-color &&
+    terraform validate -no-color &&
+    tflint --filter=${tfFilename}
+  `;
+
+  exec(cmd, (error, stdout, stderr) => {
+    let output = '';
+
+    if (stdout) {
+      output += `[STDOUT] ${stdout}\n`;
     }
-    res.type('text/plain').send(stdout);
+    if (stderr) {
+      output += `[STDERR] ${stderr}\n`;
+    }
+
+    if (error) {
+      console.error('[ERROR] Linting failed:', output);
+      return res.status(500).send(`Linting failed: ${output}`);
+    }
+
+    if (!output) {
+      output = 'No linting issues found.';
+    }
+
+    res.type('text/plain').send(output);
   });
 });
 
@@ -214,7 +235,6 @@ app.get('/estimate-cost', async (req, res) => {
   if (!lastTfFilePath) return res.status(400).send('No Terraform file for cost estimation.');
 
   const tfDir = path.dirname(lastTfFilePath);
-  const priceSheet = path.resolve('./prices.csv'); // Ensure prices.csv exists
 
   const cmd = `
     cd ${tfDir} &&
@@ -223,7 +243,7 @@ app.get('/estimate-cost', async (req, res) => {
     terraform validate -no-color &&
     terraform plan -out=tf.plan -no-color &&
     terraform show -json tf.plan > tfplan.json &&
-    oiq match --pricesheet ${priceSheet} tfplan.json | oiq price
+    oiq match --pricesheet prices.csv tfplan.json | oiq price
   `;
 
   console.log('[INFO] Running cost estimation in:', tfDir);
@@ -234,18 +254,12 @@ app.get('/estimate-cost', async (req, res) => {
       return res.status(500).send('Error running OpenInfraQuote.');
     }
 
-    try {
-      const output = JSON.parse(stdout);
-      const total = output.totalMonthlyCost || output.summary?.totalMonthlyCost || output.summary?.total || 0;
-      const resources = output.resources || output.items || output.breakdown || [];
-
-      console.log('[INFO] Parsed OIQ output successfully.');
-      res.json({ total, resources });
-    } catch (err) {
-      console.error('[ERROR] Failed to parse OIQ JSON:', err);
-      console.error('RAW OUTPUT:', stdout);
-      res.status(500).send('Error parsing cost data');
+    if (stderr) {
+        console.warn('OIQ STDERR:', stderr);
     }
+
+    // Send raw stdout as preformatted text
+    res.type('text/plain').send(stdout);
   });
 });
 
