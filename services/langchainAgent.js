@@ -6,7 +6,6 @@ require('dotenv').config();
 
 async function editTerraformCode(originalCode, userInstruction) {
   const model = new GoogleGenerativeAI({ temperature: 0, apiKey: process.env.GEMINI_API_KEY});
-  //const model = new ChatOpenAI({ temperature: 0, apiKey: process.env.OPENAI_API_KEY });
 
   const editTool = new DynamicTool({
     name: 'terraform_editor',
